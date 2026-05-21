@@ -1,5 +1,5 @@
 package com.myaplicacion.mapano.ui.fragment;
-
+import com.myaplicacion.mapano.ui.fragment.CustomInfoWindow;
 import androidx.appcompat.app.AlertDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -28,6 +28,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class MapaFragment extends Fragment {
     private MapView mapView;
     private MapaViewModel viewModel;
     private FloatingActionButton fabMiUbicacion;
-
+    private Marker marcadorActivo = null;
     private ListaDeseosViewModel deseosViewModel;
 
     // Coordenadas de Zaragoza (centro)
@@ -95,7 +96,14 @@ public class MapaFragment extends Fragment {
         mapView.setTilesScaledToDpi(true);
         mapView.setTilesScaleFactor(1.4f);
 
-
+        // Cerrar bubble al pulsar en el mapa (fuera de marcadores)
+        mapView.getOverlays().add(new org.osmdroid.views.overlay.Overlay() {
+            @Override
+            public boolean onSingleTapConfirmed(android.view.MotionEvent e, MapView mapView) {
+                cerrarBubbleActivo();
+                return false; // false para que el evento siga propagándose
+            }
+        });
     }
 
     /**
@@ -266,9 +274,28 @@ public class MapaFragment extends Fragment {
         marker.setSnippet(descripcion);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
 
-        // Al pulsar el marcador → diálogo para añadir a lista de deseos
-        marker.setOnMarkerClickListener((m, mapView) -> {
-            mostrarDialogoAñadir(idPunto, categoria, titulo, lat, lon);
+        // InfoWindow personalizada con botón "Añadir a mi lista"
+        CustomInfoWindow infoWindow = new CustomInfoWindow(
+                mapView, idPunto, categoria, titulo, descripcion, lat, lon,
+                (id, cat, nom, desc, la, lo) -> {
+                    DeseoLugar deseo = new DeseoLugar(id, cat, nom, la, lo);
+                    deseosViewModel.agregarDeseo(deseo);
+                    Snackbar.make(mapView, "Añadido a tu lista ❤️", Snackbar.LENGTH_SHORT).show();
+                }
+        );
+        marker.setInfoWindow(infoWindow);
+
+        // Al pulsar el marcador → cerrar el anterior y abrir este
+        marker.setOnMarkerClickListener((m, map) -> {
+            // Cerrar el bubble anterior si hay uno abierto
+            if (marcadorActivo != null && marcadorActivo.isInfoWindowShown()) {
+                marcadorActivo.closeInfoWindow();
+            }
+
+            // Abrir el nuevo bubble
+            m.showInfoWindow();
+            marcadorActivo = m;
+
             return true;
         });
 
@@ -279,8 +306,16 @@ public class MapaFragment extends Fragment {
      * Elimina todos los marcadores del mapa.
      */
     private void limpiarMarcadores() {
+        cerrarBubbleActivo();
+        InfoWindow.closeAllInfoWindowsOn(mapView);
         mapView.getOverlays().clear();
         mapView.invalidate();
+    }
+    private void cerrarBubbleActivo() {
+        if (marcadorActivo != null && marcadorActivo.isInfoWindowShown()) {
+            marcadorActivo.closeInfoWindow();
+            marcadorActivo = null;
+        }
     }
 
     // ========================
