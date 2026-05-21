@@ -43,6 +43,7 @@ public class MapaFragment extends Fragment {
     private FloatingActionButton fabMiUbicacion;
     private Marker marcadorActivo = null;
     private ListaDeseosViewModel deseosViewModel;
+    private org.osmdroid.views.overlay.Overlay overlayToqueMapa;
 
     // Coordenadas de Zaragoza (centro)
     private static final double ZARAGOZA_LAT = 41.6488;
@@ -96,14 +97,15 @@ public class MapaFragment extends Fragment {
         mapView.setTilesScaledToDpi(true);
         mapView.setTilesScaleFactor(1.4f);
 
-        // Cerrar bubble al pulsar en el mapa (fuera de marcadores)
-        mapView.getOverlays().add(new org.osmdroid.views.overlay.Overlay() {
+        // Overlay para detectar toques fuera de los marcadores
+        overlayToqueMapa = new org.osmdroid.views.overlay.Overlay() {
             @Override
             public boolean onSingleTapConfirmed(android.view.MotionEvent e, MapView mapView) {
                 cerrarBubbleActivo();
-                return false; // false para que el evento siga propagándose
+                return false;
             }
-        });
+        };
+        mapView.getOverlays().add(overlayToqueMapa);
     }
 
     /**
@@ -309,6 +311,8 @@ public class MapaFragment extends Fragment {
         cerrarBubbleActivo();
         InfoWindow.closeAllInfoWindowsOn(mapView);
         mapView.getOverlays().clear();
+        // Volver a añadir el overlay de toque (porque clear() lo eliminó)
+        mapView.getOverlays().add(overlayToqueMapa);
         mapView.invalidate();
     }
     private void cerrarBubbleActivo() {
