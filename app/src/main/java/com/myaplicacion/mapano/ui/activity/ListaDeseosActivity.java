@@ -1,5 +1,6 @@
 package com.myaplicacion.mapano.ui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -216,9 +217,13 @@ public class ListaDeseosActivity extends AppCompatActivity
 
                     Snackbar.make(recyclerDeseos, "Deseo actualizado ✅", Snackbar.LENGTH_SHORT).show();
                 })
-                .setNeutralButton("Marcar visitado", (dialog, which) -> {
-                    viewModel.marcarComoVisitado(deseo.getId());
-                    Snackbar.make(recyclerDeseos, "¡Marcado como visitado! 🎉", Snackbar.LENGTH_SHORT).show();
+                .setNeutralButton("📷 Fotos", (dialog, which) -> {
+                    // Abrir galería de fotos del lugar
+                    Intent intent = new Intent(ListaDeseosActivity.this, GaleriaFotosActivity.class);
+                    intent.putExtra(GaleriaFotosActivity.EXTRA_ID_PUNTO, String.valueOf(deseo.getIdPuntoInteres()));
+                    intent.putExtra(GaleriaFotosActivity.EXTRA_CATEGORIA, deseo.getCategoria());
+                    intent.putExtra(GaleriaFotosActivity.EXTRA_NOMBRE_LUGAR, deseo.getNombreLugar());
+                    startActivity(intent);
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
