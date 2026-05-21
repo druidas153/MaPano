@@ -68,7 +68,7 @@ public class MapaFragment extends Fragment {
 
         // Inicializar ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(MapaViewModel.class);
-
+        deseosViewModel = new ViewModelProvider(requireActivity()).get(ListaDeseosViewModel.class);
         // Observar datos según categoría inicial
         observarDatos();
 
@@ -183,7 +183,9 @@ public class MapaFragment extends Fragment {
                     r.getDatosComunes().getLatitud(),
                     r.getDatosComunes().getLongitud(),
                     r.getDatosComunes().getNombre(),
-                    r.getTenedoresVisual() + " - " + r.getTipoCocina()
+                    r.getTenedoresVisual() + " - " + r.getTipoCocina(),
+                    r.getId(),
+                    "restaurante"
             );
             // Color del marcador según si es premium o no
             if (r.getDatosComunes().isEsPremium()) {
@@ -307,7 +309,7 @@ public class MapaFragment extends Fragment {
                 .setMessage("¿Quieres añadir este lugar a tu lista de deseos?")
                 .setPositiveButton("❤️ Añadir", (dialog, which) -> {
                     DeseoLugar deseo = new DeseoLugar(idPunto, categoria, nombre, lat, lon);
-                    viewModel.agregarDeseo(deseo);
+                    deseosViewModel.agregarDeseo(deseo);
 
                     Snackbar.make(mapView, "Añadido a tu lista ❤️", Snackbar.LENGTH_SHORT).show();
                 })
