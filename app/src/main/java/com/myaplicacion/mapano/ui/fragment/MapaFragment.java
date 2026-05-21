@@ -6,12 +6,17 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.Manifest;
+import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -29,6 +34,8 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.List;
 
@@ -45,6 +52,9 @@ public class MapaFragment extends Fragment {
     private ListaDeseosViewModel deseosViewModel;
     private org.osmdroid.views.overlay.Overlay overlayToqueMapa;
 
+    // Variable de clase
+    private MyLocationNewOverlay locationOverlay;
+    private ActivityResultLauncher<String[]> permisoUbicacionLauncher;
     // Coordenadas de Zaragoza (centro)
     private static final double ZARAGOZA_LAT = 41.6488;
     private static final double ZARAGOZA_LON = -0.8891;
@@ -65,6 +75,21 @@ public class MapaFragment extends Fragment {
         mapView = view.findViewById(R.id.mapView);
         fabMiUbicacion = view.findViewById(R.id.fabMiUbicacion);
 
+        // Configurar launcher para pedir permisos de ubicación
+        permisoUbicacionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                result -> {
+                    Boolean fineLocation = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
+                    Boolean coarseLocation = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false);
+
+                    if (fineLocation != null && fineLocation) {
+                        activarUbicacion();
+                    } else if (coarseLocation != null && coarseLocation) {
+                        activarUbicacion();
+                    }
+                }
+        );
+
         // Configurar el mapa
         configurarMapa();
 
@@ -75,8 +100,10 @@ public class MapaFragment extends Fragment {
         observarDatos();
 
         // Botón de ubicación
-        fabMiUbicacion.setOnClickListener(v -> centrarEnZaragoza());
+        fabMiUbicacion.setOnClickListener(v -> centrarEnMiUbicacion());
 
+        // Activar geolocalización
+        verificarPermisosUbicacion();
         return view;
     }
 
@@ -313,6 +340,9 @@ public class MapaFragment extends Fragment {
         mapView.getOverlays().clear();
         // Volver a añadir el overlay de toque (porque clear() lo eliminó)
         mapView.getOverlays().add(overlayToqueMapa);
+        if (locationOverlay != null) {
+            mapView.getOverlays().add(locationOverlay);
+        }
         mapView.invalidate();
     }
     private void cerrarBubbleActivo() {
@@ -330,12 +360,18 @@ public class MapaFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        if (locationOverlay != null) {
+            locationOverlay.enableMyLocation();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mapView.onPause();
+        if (locationOverlay != null) {
+            locationOverlay.disableMyLocation();
+        }
     }
 
     /**
@@ -355,4 +391,61 @@ public class MapaFragment extends Fragment {
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
+
+    /**
+     * Verifica permisos y activa la ubicación del usuario.
+     */
+    private void verificarPermisosUbicacion() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            activarUbicacion();
+        } else {
+            // Pedir permisos
+            permisoUbicacionLauncher.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            });
+        }
+    }
+
+    /**
+     * Activa el overlay de ubicación del usuario en el mapa.
+     * Muestra un punto azul y permite centrar el mapa en la posición real.
+     */
+    private void activarUbicacion() {
+        locationOverlay = new MyLocationNewOverlay(
+                new GpsMyLocationProvider(requireContext()), mapView);
+        locationOverlay.enableMyLocation();
+
+        // Cuando obtiene la primera ubicación, centrar el mapa ahí
+        locationOverlay.runOnFirstFix(() -> {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    if (locationOverlay.getMyLocation() != null) {
+                        mapView.getController().animateTo(locationOverlay.getMyLocation());
+                        mapView.getController().setZoom(16.0);
+                    }
+                });
+            }
+        });
+
+        mapView.getOverlays().add(locationOverlay);
+        mapView.invalidate();
+    }
+
+    /**
+     * Centra el mapa en la ubicación actual del usuario.
+     */
+    private void centrarEnMiUbicacion() {
+        if (locationOverlay != null && locationOverlay.getMyLocation() != null) {
+            mapView.getController().animateTo(locationOverlay.getMyLocation());
+            mapView.getController().setZoom(16.0);
+        } else {
+            // Si no hay ubicación, centrar en Zaragoza por defecto
+            mapView.getController().animateTo(new GeoPoint(ZARAGOZA_LAT, ZARAGOZA_LON));
+            mapView.getController().setZoom(ZOOM_INICIAL);
+            Snackbar.make(mapView, "Activa la ubicación para centrar en tu posición", Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
 }
