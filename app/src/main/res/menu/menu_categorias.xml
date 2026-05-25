@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/cat_restaurantes"
+        android:icon="@android:drawable/ic_menu_mapmode"
+        android:title="Restaurantes" />
+
+    <item
+        android:id="@+id/cat_eventos"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Eventos" />
+
+    <item
+        android:id="@+id/cat_farmacias"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="Farmacias" />
+
+    <item
+        android:id="@+id/cat_taxis"
+        android:icon="@android:drawable/ic_menu_send"
+        android:title="Taxis" />
+
+    <item
+        android:id="@+id/cat_deseos"
+        android:icon="@android:drawable/ic_menu_my_calendar"
+        android:title="Mi Lista" />
+
+</menu>

@@ -36,5 +36,8 @@ public interface ParadaTaxiDao {
 
     @Query("DELETE FROM paradas_taxi")
     void eliminarTodas();
+    
+    @Query("DELETE FROM paradas_taxi WHERE origenDatos = :origen")
+    void eliminarPorOrigen(String origen);
 }
 

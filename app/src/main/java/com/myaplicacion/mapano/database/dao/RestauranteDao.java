@@ -41,5 +41,7 @@ public interface RestauranteDao {
     @Query("SELECT COUNT(*) FROM restaurantes")
     int contarRestaurantes();
 
+    @Query("DELETE FROM restaurantes WHERE origenDatos = :origen")
+    void eliminarPorOrigen(String origen);
 
 }

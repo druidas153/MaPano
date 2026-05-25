@@ -36,4 +36,7 @@ public interface FarmaciaDao {
 
     @Query("DELETE FROM farmacias")
     void eliminarTodas();
+
+    @Query("DELETE FROM farmacias WHERE origenDatos = :origen")
+    void eliminarPorOrigen(String origen);
 }
