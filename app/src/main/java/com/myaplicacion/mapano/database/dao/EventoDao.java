@@ -40,4 +40,7 @@ public interface EventoDao {
 
     @Query("DELETE FROM eventos")
     void eliminarTodos();
+
+    @Query("DELETE FROM eventos WHERE origenDatos = :origen")
+    void eliminarPorOrigen(String origen);
 }
