@@ -3,6 +3,7 @@ import com.myaplicacion.mapano.ui.fragment.CustomInfoWindow;
 import androidx.appcompat.app.AlertDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,6 +61,7 @@ public class MapaFragment extends Fragment {
     private static final double ZARAGOZA_LON = -0.8891;
     private static final double ZOOM_INICIAL = 15.0;
 
+    private static final String TAG = "MapaFragment";
     // Categoría actualmente seleccionada
     private String categoriaActual = "restaurante";
 
@@ -149,6 +151,8 @@ public class MapaFragment extends Fragment {
     private void observarDatos() {
         // Observar restaurantes
         viewModel.getRestaurantes().observe(getViewLifecycleOwner(), restaurantes -> {
+            Log.d("MAPA", "Restaurantes recibidos en observer: " +
+                    (restaurantes != null ? restaurantes.size() : 0));
             if ("restaurante".equals(categoriaActual)) {
                 limpiarMarcadores();
                 mostrarRestaurantes(restaurantes);
@@ -239,7 +243,11 @@ public class MapaFragment extends Fragment {
                     e.getDatosComunes().getLatitud(),
                     e.getDatosComunes().getLongitud(),
                     e.getDatosComunes().getNombre(),
-                    e.getTipoEvento() + " - " + e.getFechaInicio() + " " + e.getHoraInicio()
+                    e.getTipoEvento() + " - " + e.getFechaInicio() + " " + e.getHoraInicio()+" "
+                    +(e.getFechaFin() != null ? e.getFechaFin() : "")
+                    +(e.getHoraFin() != null ? e.getHoraFin() : "") ,
+                    e.getId(),
+                    "evento"
             );
             if (e.isEsPatrocinado()) {
                 marker.setSubDescription("⭐ PATROCINADO: " + e.getMensajePromo());
@@ -255,7 +263,10 @@ public class MapaFragment extends Fragment {
                     f.getDatosComunes().getLatitud(),
                     f.getDatosComunes().getLongitud(),
                     f.getDatosComunes().getNombre(),
-                    f.getEstadoTexto() + " - " + f.getTelefono()
+                    f.getEstadoTexto() + " - " + f.getTelefono(),
+                    f.getId(),
+                    "farmacia"
+
             );
             mapView.getOverlays().add(marker);
         }
@@ -268,7 +279,9 @@ public class MapaFragment extends Fragment {
                     t.getDatosComunes().getLatitud(),
                     t.getDatosComunes().getLongitud(),
                     t.getDatosComunes().getNombre(),
-                    t.getEstadoVisual()
+                    t.getEstadoVisual(),
+                    t.getId(),
+                    "taxi"
             );
             mapView.getOverlays().add(marker);
         }
@@ -302,7 +315,7 @@ public class MapaFragment extends Fragment {
         marker.setTitle(titulo);
         marker.setSnippet(descripcion);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-
+        //Log.d(TAG,"Descripcion" +descripcion);
         // InfoWindow personalizada con botón "Añadir a mi lista"
         CustomInfoWindow infoWindow = new CustomInfoWindow(
                 mapView, idPunto, categoria, titulo, descripcion, lat, lon,

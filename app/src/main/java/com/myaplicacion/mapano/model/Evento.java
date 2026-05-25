@@ -205,6 +205,6 @@ public class Evento {
 
     @Override
     public String toString() {
-        return datosComunes.getNombre() + " - " + tipoEvento + " (" + fechaInicio + ")";
+        return datosComunes.getNombre() + " - " + tipoEvento + " (" + fechaInicio + ")"+" ("+fechaFin+")";
     }
 }
