@@ -19,7 +19,6 @@ import com.myaplicacion.mapano.network.model.EventoApiResponse;
 import com.myaplicacion.mapano.network.model.FarmaciaApiResponse;
 import com.myaplicacion.mapano.network.model.RestauranteApiResponse;
 import com.myaplicacion.mapano.network.model.TaxiApiResponse;
-import com.myaplicacion.mapano.util.CoordenadasUtil;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -79,12 +78,6 @@ public class DataRepository {
                             //        " lat=" + api.getGeometry().getLatitud() +
                             //        " lon=" + api.getGeometry().getLongitud());
 
-                            // Convertir UTM a Lat/Lon
-                            double utmX = api.getGeometry().getLongitud(); // X = Easting
-                            double utmY = api.getGeometry().getLatitud();  // Y = Northing
-                            double[] latLon = CoordenadasUtil.utmToLatLon(utmX, utmY);
-                            double latitud = latLon[0];
-                            double longitud = latLon[1];
 /*
                             Log.d(TAG, "Restaurante: " + api.getTitle() +
                                     " Lat/Y=" + api.getGeometry().getLatitud() + " Lon/X=" + api.getGeometry().getLongitud());
@@ -94,9 +87,7 @@ public class DataRepository {
                                     api.getTitle(),
                                     api.getDescription() != null ? api.getDescription() : "",
                                     api.getGeometry().getLatitud(),
-                                    //latitud,
                                     api.getGeometry().getLongitud(),
-                                    //longitud,
                                     api.getAddress() != null ? api.getAddress() : ""
                             );
                             datos.setOrigenDatos("API_ZARAGOZA");
