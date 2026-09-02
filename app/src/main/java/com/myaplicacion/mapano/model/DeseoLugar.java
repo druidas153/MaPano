@@ -17,8 +17,27 @@ public class DeseoLugar {
 
     // === Referencia al punto de interés ===
     private long idPuntoInteres;        // ID del restaurante/evento/farmacia/taxi
+    private long idPuntoBackend;
+    private long idDeseoBackend;
     private String categoria;           // "restaurante", "evento", "farmacia", "taxi"
     private String nombreLugar;         // Para mostrar en la lista sin consultar otra tabla
+
+    public long getIdPuntoBackend() {
+        return idPuntoBackend;
+    }
+
+    public long getIdDeseoBackend() {
+        return idDeseoBackend;
+    }
+
+    public void setIdPuntoBackend(long idPuntoBackend) {
+        this.idPuntoBackend = idPuntoBackend;
+    }
+
+    public void setIdDeseoBackend(long idDeseoBackend) {
+        this.idDeseoBackend = idDeseoBackend;
+    }
+
     private double latitud;             // Para calcular ruta y geofencing
     private double longitud;
 

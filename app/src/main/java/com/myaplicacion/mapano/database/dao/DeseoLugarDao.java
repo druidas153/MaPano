@@ -50,7 +50,8 @@ public interface DeseoLugarDao {
 
     @Query("SELECT COUNT(*) FROM deseos_lugar WHERE idPuntoInteres = :idPunto AND categoria = :categoria")
     int existeEnLista(long idPunto, String categoria);
-
+    @Query("SELECT * FROM deseos_lugar WHERE idDeseoBackend = :idDeseoBackend LIMIT 1")
+    DeseoLugar obtenerPorIdDeseoBackend(long idDeseoBackend);
     // ========================
     // UPDATE (Modificación)
     // ========================
