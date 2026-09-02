@@ -33,7 +33,7 @@ import com.myaplicacion.mapano.model.Restaurante;
                 DeseoLugar.class,
                 FotoLugar.class
         },
-        version = 1,
+        version = 2,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

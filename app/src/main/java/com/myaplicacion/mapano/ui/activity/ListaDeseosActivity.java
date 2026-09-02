@@ -65,6 +65,31 @@ public class ListaDeseosActivity extends AppCompatActivity
         configurarFiltros();
     }
 
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        viewModel.sincronizarDeseosBackend(
+                new ListaDeseosViewModel.OnOperacionCallback()
+                {
+                    @Override
+                    public void onCorrecto()
+                    {
+                        // LiveData actualizará automáticamente la lista
+                    }
+
+                    @Override
+                    public void onError(String mensaje)
+                    {
+                        Snackbar.make(
+                                recyclerDeseos,
+                                mensaje,
+                                Snackbar.LENGTH_LONG).show();
+                    }
+                });
+    }
+
     /**
      * Observa todos los deseos.
      */
@@ -211,11 +236,24 @@ public class ListaDeseosActivity extends AppCompatActivity
                     }
 
                     // Actualizar en la base de datos
-                    deseo.setNotaPersonal(nuevaNota);
-                    deseo.setPrioridad(nuevaPrioridad);
-                    viewModel.actualizarDeseo(deseo);
+                    viewModel.actualizarDeseoSincronizado(
+                            deseo,
+                            nuevaNota,
+                            nuevaPrioridad,
+                            new ListaDeseosViewModel.OnOperacionCallback()
+                            {
+                                @Override
+                                public void onCorrecto()
+                                {
+                                    Snackbar.make(recyclerDeseos,"Deseo actualizado ✅",Snackbar.LENGTH_SHORT).show();
+                                }
 
-                    Snackbar.make(recyclerDeseos, "Deseo actualizado ✅", Snackbar.LENGTH_SHORT).show();
+                                @Override
+                                public void onError(String mensaje)
+                                {
+                                    Snackbar.make(recyclerDeseos,mensaje,Snackbar.LENGTH_LONG).show();
+                                }
+                            });
                 })
                 .setNeutralButton("📷 Fotos", (dialog, which) -> {
                     // Abrir galería de fotos del lugar
@@ -237,13 +275,26 @@ public class ListaDeseosActivity extends AppCompatActivity
                 .setTitle("Eliminar de la lista")
                 .setMessage("¿Quieres eliminar \"" + deseo.getNombreLugar() + "\" de tu lista de deseos?")
                 .setPositiveButton("Eliminar", (dialog, which) -> {
-                    viewModel.eliminarDeseo(deseo);
-                    Snackbar.make(recyclerDeseos, "Eliminado de tu lista 🗑️", Snackbar.LENGTH_LONG)
-                            .setAction("Deshacer", v -> {
-                                // Volver a insertar si el usuario pulsa "Deshacer"
-                                viewModel.agregarDeseo(deseo);
-                            })
-                            .show();
+                    viewModel.eliminarDeseoSincronizado(deseo,new ListaDeseosViewModel.OnOperacionCallback()
+                            {
+                                @Override
+                                public void onCorrecto()
+                                {
+                                    Snackbar.make(
+                                            recyclerDeseos,
+                                            "Eliminado de tu lista 🗑️",
+                                            Snackbar.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onError(String mensaje)
+                                {
+                                    Snackbar.make(
+                                            recyclerDeseos,
+                                            mensaje,
+                                            Snackbar.LENGTH_LONG).show();
+                                }
+                            });
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();

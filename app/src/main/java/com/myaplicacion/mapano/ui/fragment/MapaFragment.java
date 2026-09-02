@@ -321,8 +321,20 @@ public class MapaFragment extends Fragment {
                 mapView, idPunto, categoria, titulo, descripcion, lat, lon,
                 (id, cat, nom, desc, la, lo) -> {
                     DeseoLugar deseo = new DeseoLugar(id, cat, nom, la, lo);
-                    deseosViewModel.agregarDeseo(deseo);
-                    Snackbar.make(mapView, "Añadido a tu lista ❤️", Snackbar.LENGTH_SHORT).show();
+                    deseosViewModel.agregarDeseoSincronizado(deseo,desc,new ListaDeseosViewModel.OnOperacionCallback()
+                            {
+                                @Override
+                                public void onCorrecto()
+                                {
+                                    Snackbar.make(mapView,"Añadido a tu lista ❤️",Snackbar.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onError(String mensaje)
+                                {
+                                    Snackbar.make(mapView,mensaje,Snackbar.LENGTH_LONG).show();
+                                }
+                            });
                 }
         );
         marker.setInfoWindow(infoWindow);
@@ -386,25 +398,6 @@ public class MapaFragment extends Fragment {
             locationOverlay.disableMyLocation();
         }
     }
-
-    /**
-     * Muestra un diálogo para añadir el lugar a la lista de deseos.
-     */
-    private void mostrarDialogoAñadir(long idPunto, String categoria,
-                                      String nombre, double lat, double lon) {
-        new AlertDialog.Builder(requireContext())
-                .setTitle(nombre)
-                .setMessage("¿Quieres añadir este lugar a tu lista de deseos?")
-                .setPositiveButton("❤️ Añadir", (dialog, which) -> {
-                    DeseoLugar deseo = new DeseoLugar(idPunto, categoria, nombre, lat, lon);
-                    deseosViewModel.agregarDeseo(deseo);
-
-                    Snackbar.make(mapView, "Añadido a tu lista ❤️", Snackbar.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
-    }
-
     /**
      * Verifica permisos y activa la ubicación del usuario.
      */
