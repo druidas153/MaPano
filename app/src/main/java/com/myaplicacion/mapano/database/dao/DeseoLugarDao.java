@@ -30,26 +30,26 @@ public interface DeseoLugarDao {
     // READ (Consultas)
     // ========================
 
-    @Query("SELECT * FROM deseos_lugar ORDER BY fechaAnadido DESC")
-    LiveData<List<DeseoLugar>> obtenerTodos();
+    @Query("SELECT * FROM deseos_lugar WHERE usuarioId = :usuarioId ORDER BY fechaAnadido DESC")
+    LiveData<List<DeseoLugar>> obtenerTodos(long usuarioId);
 
     @Query("SELECT * FROM deseos_lugar WHERE id = :id")
     LiveData<DeseoLugar> obtenerPorId(long id);
 
-    @Query("SELECT * FROM deseos_lugar WHERE categoria = :categoria ORDER BY prioridad DESC")
-    LiveData<List<DeseoLugar>> obtenerPorCategoria(String categoria);
+    @Query("SELECT * FROM deseos_lugar WHERE usuarioId = :usuarioId AND categoria = :categoria ORDER BY prioridad DESC")
+    LiveData<List<DeseoLugar>> obtenerPorCategoria(long usuarioId, String categoria);
 
-    @Query("SELECT * FROM deseos_lugar WHERE visitado = 0 ORDER BY prioridad DESC")
-    LiveData<List<DeseoLugar>> obtenerPendientes();
+    @Query("SELECT * FROM deseos_lugar WHERE usuarioId = :usuarioId AND visitado = 0 ORDER BY prioridad DESC")
+    LiveData<List<DeseoLugar>> obtenerPendientes(long usuarioId);
 
-    @Query("SELECT * FROM deseos_lugar WHERE visitado = 1 ORDER BY fechaVisita DESC")
-    LiveData<List<DeseoLugar>> obtenerVisitados();
+    @Query("SELECT * FROM deseos_lugar WHERE usuarioId = :usuarioId AND visitado = 1 ORDER BY fechaVisita DESC")
+    LiveData<List<DeseoLugar>> obtenerVisitados(long usuarioId);
 
     @Query("SELECT * FROM deseos_lugar WHERE engagementConfirmado = 1")
     LiveData<List<DeseoLugar>> obtenerConEngagement();
 
-    @Query("SELECT COUNT(*) FROM deseos_lugar WHERE idPuntoInteres = :idPunto AND categoria = :categoria")
-    int existeEnLista(long idPunto, String categoria);
+    @Query("SELECT COUNT(*) FROM deseos_lugar WHERE usuarioId = :usuarioId AND idPuntoInteres = :idPunto AND categoria = :categoria")
+    int existeEnLista(long usuarioId, long idPunto, String categoria);
     @Query("SELECT * FROM deseos_lugar WHERE idDeseoBackend = :idDeseoBackend LIMIT 1")
     DeseoLugar obtenerPorIdDeseoBackend(long idDeseoBackend);
     // ========================

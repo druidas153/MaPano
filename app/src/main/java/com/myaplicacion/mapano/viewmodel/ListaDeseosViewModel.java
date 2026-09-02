@@ -55,9 +55,9 @@ public class ListaDeseosViewModel extends AndroidViewModel {
 
         usuarioId = preferencias.getLong("usuarioId", -1);
 
-        todosLosDeseos = deseoLugarDao.obtenerTodos();
-        deseosPendientes = deseoLugarDao.obtenerPendientes();
-        deseosVisitados = deseoLugarDao.obtenerVisitados();
+        todosLosDeseos = deseoLugarDao.obtenerTodos(usuarioId);
+        deseosPendientes = deseoLugarDao.obtenerPendientes(usuarioId);
+        deseosVisitados = deseoLugarDao.obtenerVisitados(usuarioId);
     }
 
     // ========================
@@ -77,7 +77,7 @@ public class ListaDeseosViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<DeseoLugar>> getDeseosPorCategoria(String categoria) {
-        return deseoLugarDao.obtenerPorCategoria(categoria);
+        return deseoLugarDao.obtenerPorCategoria(usuarioId, categoria);
     }
 
     public void consultarDeseosBackend(OnConsultaDeseosCallback callback)
@@ -173,6 +173,7 @@ public class ListaDeseosViewModel extends AndroidViewModel {
 
         deseo.setIdDeseoBackend(respuesta.getId());
 
+        deseo.setUsuarioId(respuesta.getUsuarioId());
         deseo.setNotaPersonal(respuesta.getNota());
 
         deseo.setVisitado(respuesta.isVisitado());
@@ -205,12 +206,16 @@ public class ListaDeseosViewModel extends AndroidViewModel {
 
         deseoLocal.setVisitado(
                 respuesta.isVisitado());
+
+        deseoLocal.setUsuarioId(
+                respuesta.getUsuarioId());
     }
     // ========================
     // CREATE (Alta)
     // ========================
 
     public void agregarDeseo(DeseoLugar deseo) {
+        deseo.setUsuarioId(usuarioId);
         executor.execute(() -> deseoLugarDao.insertar(deseo));
     }
 
@@ -287,6 +292,7 @@ public class ListaDeseosViewModel extends AndroidViewModel {
 
                         deseo.setIdPuntoBackend(idPuntoBackend);
                         deseo.setIdDeseoBackend(response.body().getId());
+                        deseo.setUsuarioId(response.body().getUsuarioId());
 
                         executor.execute(() ->
                         {
@@ -428,7 +434,7 @@ public class ListaDeseosViewModel extends AndroidViewModel {
 
     public void verificarSiExiste(long idPunto, String categoria, OnExisteCallback callback) {
         executor.execute(() -> {
-            int count = deseoLugarDao.existeEnLista(idPunto, categoria);
+            int count = deseoLugarDao.existeEnLista(usuarioId, idPunto, categoria);
             callback.onResult(count > 0);
         });
     }

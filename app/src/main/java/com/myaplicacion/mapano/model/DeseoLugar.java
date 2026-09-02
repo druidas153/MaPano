@@ -19,6 +19,7 @@ public class DeseoLugar {
     private long idPuntoInteres;        // ID del restaurante/evento/farmacia/taxi
     private long idPuntoBackend;
     private long idDeseoBackend;
+    private long usuarioId = -1;
     private String categoria;           // "restaurante", "evento", "farmacia", "taxi"
     private String nombreLugar;         // Para mostrar en la lista sin consultar otra tabla
 
@@ -28,6 +29,14 @@ public class DeseoLugar {
 
     public long getIdDeseoBackend() {
         return idDeseoBackend;
+    }
+
+    public long getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void setUsuarioId(long usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public void setIdPuntoBackend(long idPuntoBackend) {
